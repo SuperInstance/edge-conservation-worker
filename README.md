@@ -64,10 +64,15 @@ Edge Conservation Worker is the **edge-verification node** for γ + η = C. It t
 
 See [ARCHITECTURE.md](https://github.com/SuperInstance/SuperInstance/blob/main/ARCHITECTURE.md).
 
+**Edge colo as a variable:** Cloudflare's 300+ edge locations run diverse hardware: some colos use Intel Xeon, others use ARM-based Ampere CPUs. Floating-point results can differ slightly across architectures due to FPU implementation differences (IEEE 754 permits variant results for transcendental operations). The conservation Worker's delta measurements capture this hardware variance — a non-zero delta on `/entropy` or `/matrix` at a specific colo indicates architecture-dependent FP deviation, which must be accounted for when setting conservation violation thresholds.
+
+**Cold start impact:** Workers experience cold starts when a colo receives its first request after being idle. The cold-start path includes V8 isolate creation (~5ms), KV binding initialization (~10ms), and script evaluation (~2ms). Conservation checks during cold start show elevated latency (20–30ms vs. 2–5ms warm). For real-time conservation monitoring, the `/health` endpoint serves as a warm-keepalive — periodic health pings prevent cold starts on the computation endpoints.
+
 ## References
 
 1. Shannon, C.E. (1948). "A Mathematical Theory of Communication." *Bell System Technical Journal*, 27.
 2. Cloudflare (2024). *Workers Runtime: KV Storage API*. developers.cloudflare.com.
+3. IEEE (2019). *IEEE Standard for Floating-Point Arithmetic (754-2019)*. Section 3.1: Format-dependent results.
 
 ## License
 
